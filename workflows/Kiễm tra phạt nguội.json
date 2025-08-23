@@ -1,0 +1,311 @@
+{
+  "name": "Kiễm tra phạt nguội",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        -48
+      ],
+      "id": "1c982d5f-3106-4092-a10c-53bcb6f426c5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.csgt.vn/?mod=contact&task=tracuu_post&ajax",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "={{ $('Lấy captcha').item.json.headers['set-cookie'][0] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "BienKS",
+              "value": "={{ $('Thông tin xe tra cứu').item.json.BienSoXe }}"
+            },
+            {
+              "name": "Xe",
+              "value": "={{ $('Thông tin xe tra cứu').item.json.LoaiXe }}"
+            },
+            {
+              "name": "captcha",
+              "value": "={{ $json.content }}"
+            },
+            {
+              "name": "ipClient",
+              "value": "=9.9.9.91"
+            },
+            {
+              "name": "cUrl",
+              "value": "=1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        128,
+        -48
+      ],
+      "id": "cbae32ec-4f18-4ab2-b495-08c57c9c810d",
+      "name": "Call link get result"
+    },
+    {
+      "parameters": {
+        "content": "## Ghi Chú\n#Mã Loại Xe\n- Nếu là Ô TÔ thì MaLoaiXe=1\n- Nếu là XE MÁY thì MaLoaiXe=2\n- Nếu là XE MÁY ĐIỆN thì MaLoaiXe=3\n",
+        "height": 816,
+        "width": 2320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1136,
+        -368
+      ],
+      "typeVersion": 1,
+      "id": "b9dbbdfe-e585-46b6-9b5e-a54edb6d45eb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\n// Get raw text from input\nconst text =$input.first().json.data\n// Remove extra newlines and parse JSON\nlet url = null;\ntry {\n  const cleanText = text.toString().trim();\n  const json = JSON.parse(cleanText);\n  url = json.href.replace(/\\\\\\//g, \"/\"); // fix escaped slashes\n} catch (err) {\n}\n\n// Return extracted URL\nreturn [{ url }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        -48
+      ],
+      "id": "321e06fd-6f6c-47ff-bcee-c3394db096dc",
+      "name": "ExtractUrl"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bc792cf3-94cb-47fa-957c-9af44d628fc4",
+              "name": "BienSoXe",
+              "value": "51K84072",
+              "type": "string"
+            },
+            {
+              "id": "f248c12f-2f0f-4d91-8169-bf9592a5b1df",
+              "name": "LoaiXe",
+              "value": "1",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -720,
+        -48
+      ],
+      "id": "7eb4cbca-7dda-4242-bcc5-fed7ce651fdd",
+      "name": "Thông tin xe tra cứu"
+    },
+    {
+      "parameters": {
+        "url": "https://www.csgt.vn/lib/captcha/captcha.class.php",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -384,
+        -48
+      ],
+      "id": "7764dbdd-d887-4c17-9ed2-cdc736d018c3",
+      "name": "Lấy captcha"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "extract text from this image.\nresponse only text extracted from image",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -128,
+        -48
+      ],
+      "id": "83c7a552-1546-4ccb-93b7-5d2ef4303a48",
+      "name": "Giải captcha",
+      "credentials": {
+        "openAiApi": {
+          "id": "V0DJvj23qBdJL2av",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "operation": "getScreenshot",
+        "fullPage": true,
+        "options": {
+          "headers": {
+            "parameter": [
+              {
+                "name": "Cookie",
+                "value": "={{ $('Lấy captcha').item.json.headers['set-cookie'][0] }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "CUSTOM.puppeteer",
+      "typeVersion": 1,
+      "position": [
+        832,
+        144
+      ],
+      "id": "b3f15ea7-3c41-488d-a93e-bb42f266d0ab",
+      "name": "Chụp màn hình"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "={{ $('Lấy captcha').item.json.headers['set-cookie'][0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        832,
+        -48
+      ],
+      "id": "5b317fff-2758-414c-be94-d49b4ae33e55",
+      "name": "Lấy html kết quả",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Thông tin xe tra cứu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call link get result": {
+      "main": [
+        [
+          {
+            "node": "ExtractUrl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExtractUrl": {
+      "main": [
+        [
+          {
+            "node": "Lấy html kết quả",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chụp màn hình",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Thông tin xe tra cứu": {
+      "main": [
+        [
+          {
+            "node": "Lấy captcha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy captcha": {
+      "main": [
+        [
+          {
+            "node": "Giải captcha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Giải captcha": {
+      "main": [
+        [
+          {
+            "node": "Call link get result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy html kết quả": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "71858001-7559-4e01-892c-5d303cd0d5e2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a4453980906a33b544bbe1d0c22ef6c2616dd383c1b33080f233447af9119358"
+  },
+  "id": "akvD350Q5YaIIDgU",
+  "tags": []
+}
