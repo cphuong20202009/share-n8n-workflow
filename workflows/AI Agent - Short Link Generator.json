@@ -1,0 +1,458 @@
+{
+  "name": "AI Agent - Short Link Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "MzE4aKh7Wsv4N0Cv",
+          "mode": "list",
+          "cachedResultName": "ShortLink",
+          "cachedResultUrl": "/projects/pjq2PmuJxpMOPZST/datatables/MzE4aKh7Wsv4N0Cv"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "orginalLink": "={{ $('GenerateShortLink').item.json.originalLink }}",
+            "shortlinkId": "={{ $json.shortLinkId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "orginalLink",
+              "displayName": "orginalLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "shortlinkId",
+              "displayName": "shortlinkId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -144
+      ],
+      "id": "6c7043d8-e091-4e50-a661-f1047576c565",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nvar length = 4;\n const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';\n  let result = '';\n  for (let i = 0; i < length; i++) {\n    const randomIndex = Math.floor(Math.random() * chars.length);\n    result += chars[randomIndex];\n  }\n\n  return [{ shortLinkId: result }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -144
+      ],
+      "id": "310ecc62-f469-42d8-bb15-8795e0aef955",
+      "name": "Generate shorlinkId"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "MzE4aKh7Wsv4N0Cv",
+          "mode": "list",
+          "cachedResultName": "ShortLink",
+          "cachedResultUrl": "/projects/pjq2PmuJxpMOPZST/datatables/MzE4aKh7Wsv4N0Cv"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "shortlinkId",
+              "keyValue": "={{ $json.query.a }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        80
+      ],
+      "id": "1a615458-ea3c-4336-b9fd-602844b36f5d",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -688,
+        -576
+      ],
+      "id": "2c2ace57-bb37-43b5-a606-122e38928bb2",
+      "name": "When chat message received",
+      "webhookId": "a282c57a-a0b2-43d9-9fe5-fdd3b61ad585"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -352,
+        -576
+      ],
+      "id": "af6bae57-7f02-4b14-b5a0-f4d852321a62",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -480,
+        -368
+      ],
+      "id": "c10cdd53-ddaa-4701-922c-5788c3f41759",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "2TBvwobWbbHlIjKT",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        -368
+      ],
+      "id": "8d9e3709-0fb7-4fbc-9c1d-f3f74878e6bc",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "\n{\n\"originalLink\": \n\"https://www.nghiaai.dev/\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -688,
+        -144
+      ],
+      "id": "1e495a59-c48b-4887-a9c1-19c53072a591",
+      "name": "GenerateShortLink"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5c7030c4-c308-4e95-a78d-c32d8a252df4",
+              "name": "your_webhook_url",
+              "value": "http://localhost:5678",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -464,
+        -144
+      ],
+      "id": "4e019563-fc6f-4ec7-b79e-1817cd35e411",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "jsCode": "var your_webhook_url = $('Config').first().json.your_webhook_url;\nvar shortLinkId = $('Generate shorlinkId').first().json.shortLinkId\nvar shortLink = your_webhook_url + \"/webhook/shortLink?a=\" + shortLinkId;\nreturn [{ shortLink: shortLink }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        -144
+      ],
+      "id": "290c7c96-1cc9-432a-806e-6f2b04fe92a5",
+      "name": "Generate ShortLink"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to get short link",
+        "workflowId": {
+          "__rl": true,
+          "value": "WmHtnpnkARE1wVqs",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/WmHtnpnkARE1wVqs",
+          "cachedResultName": "Create Short Link"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "originalLink": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('originalLink', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "originalLink",
+              "displayName": "originalLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "host",
+              "displayName": "host",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        -368
+      ],
+      "id": "1a2213c2-c423-49a0-a2b1-939109d30391",
+      "name": "Call 'Create Short Link'"
+    },
+    {
+      "parameters": {
+        "html": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <title>Redirecting…</title>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <!-- Optional: meta refresh as a no-JS fallback -->\n  <meta http-equiv=\"refresh\" content=\"0; url={{ $json.orginalLink }}\" />\n  <script>\n    // Use replace() so it doesn't create an extra history entry\n    location.replace({{ $json.orginalLink }});\n  </script>\n  <style>\n    body {font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; display:grid; place-content:center; min-height:100vh;}\n    a {text-decoration: none;}\n  </style>\n</head>\n<body>\n  <p>Redirecting… If nothing happens, <a href=\"{{ $json.orginalLink }}\">click here</a>.</p>\n</body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        80
+      ],
+      "id": "49807a5c-8c1a-4a6d-9e1b-b6d0ea72ff92",
+      "name": "Page Redirect"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -16,
+        80
+      ],
+      "id": "d6732527-8565-4d7d-8bf5-77f02eba0462",
+      "name": "Response"
+    },
+    {
+      "parameters": {
+        "path": "shortLink",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -688,
+        80
+      ],
+      "id": "866a4e41-ff4f-4eda-8be8-0e584285318b",
+      "name": "ShortLink API",
+      "webhookId": "b280e565-5037-4752-ba2c-547e4b52531c"
+    },
+    {
+      "parameters": {
+        "content": "This AI Agent helps you create short links from your original URLs.  \nEach generated short link is automatically stored in a database table for easy management and tracking.\n\n---\n\n## How It Works\n\n1. Provide a long URL to the Agent.  \n2. The Agent saves your original link in the database.  \n3. It generates a short link in the following format:\n\n```\nShort link:  https://{webhook_url}/webhook/shortLink?q={shortLinkId}\n```\n\nWhen users open the short link, they are automatically redirected to your original link.\n\n---\n\n## How to Use\n\n- Send your link to the Agent.  \n- The Agent will respond with a generated short link.  \n\n---\n\n## Requirements\n\n- Add your `your_webhook_url` to the **Config Node**.  \n- OpenAI account\n- Create a database table named `ShortLink` with the following columns:\n\n| Column Name   | Description                  |\n|----------------|------------------------------|\n| `originalLink` | Stores the full original URL. |\n| `shortLinkId`  | Stores the unique short link ID. |\n\n---\n\n## Customization Options\n\n- Add traffic tracking or analytics for each short link.  \n- Customize the redirect page to display your logo, message, or branding.\n",
+        "height": 1120,
+        "width": 1024
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1776,
+        -624
+      ],
+      "typeVersion": 1,
+      "id": "ad474ea3-02bb-4770-88b0-8bba2c5ad859",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Generate shorlinkId": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "Generate ShortLink",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Page Redirect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenerateShortLink": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Generate shorlinkId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Create Short Link'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Page Redirect": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ShortLink API": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6909ceea-8130-4c61-81c3-999dd63d7696",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a0e41110bf9f611e96e18e0663d80d746aeedc58368940bfe471a8d577a5069b"
+  },
+  "id": "WmHtnpnkARE1wVqs",
+  "tags": []
+}
